@@ -1,0 +1,81 @@
+body {
+    width: 100vw;
+    height: 100%;
+    display: flex;
+    font-family: arial;
+    display: flex;
+    justify-content: center;
+    .popup-configuration {
+        margin-top: 10%;
+        display: flex;
+        flex-flow: column nowrap;
+        .generate-popup-btn {
+            padding: .5rem;
+        }
+    }
+    .popup-container,
+    .sport-popup-container {
+        width: 40%;
+        position: absolute;
+        top: 20vh;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: white;
+        .popup {
+            border: 2px solid grey;
+            width: 100%;
+            height: 100%;
+            .popup-top {
+                width: 100%;
+                height: 50px;
+                display: flex;
+                flex-flow: row nowrap;
+                justify-content: space-between;
+                align-items: center;
+                padding: .8rem;
+                background-color: rgb(60, 60, 60);
+                color: white;
+                .popup-title {
+                    margin: 0;
+                    font-weight: 400;
+                }
+                .cross {
+                    font-weight: 900;
+                    margin: 0;
+                    font-size: 1.6rem;
+                    cursor: pointer;
+                }
+            }
+            .popup-bot {
+                height: calc(100% - 50px);
+                padding: 1rem .5rem;
+                display: flex;
+                flex-flow: column nowrap;
+                justify-content: space-between;
+                .popup-content {
+                    margin: 0;
+                }
+                .popup-btn-container {
+                    width: 100%;
+                    display: flex;
+                    flex-flow: row wrap;
+                    justify-content: center;
+                    align-items: center;
+                    .popup-btn {
+                        background-color: red;
+                        color: white;
+                        border-radius: 5px;
+                        border-style: none;
+                        outline: none;
+                        padding: .5rem;
+                        cursor: pointer;
+                        margin: .2rem;
+                        &:hover {
+                            background-color: darkred;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
