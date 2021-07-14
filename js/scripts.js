@@ -1,83 +1,52 @@
-// ------------------------------------------------------ variables
+// * ------------------------------------------------------ variables
 var generatePopupBtn = document.querySelector('.generate-popup-btn'),
     popupContainer = document.querySelector('.popup-container'),
     sportPopupContainer = document.querySelector('.sport-popup-container');
 var xhr, thisJSON, currentUrl;
 var sports = [
-    { name: 'get soccer games', id: 'soccer' },
-    { name: 'get basket games', id: 'basket' },
-    { name: 'get horses games', id: 'horses' },
-    { name: 'get badminton games', id: 'badminton' }
-]
+    { fullTitle: 'get soccer games', id: 'soccer' },
+    { fullTitle: 'get basket games', id: 'basket' },
+    { fullTitle: 'get horses games', id: 'horses' },
+    { fullTitle: 'get badminton games', id: 'badminton' }
+];
 
-// ------------------------------------------------------ functions
+// * ------------------------------------------------------ functions
+// Reset
 function reset(div) {
     div.innerHTML = '';
 }
 
-function successCallBack(data, sportID) {
-    var content = 'next matches:';
-    sportPopupContainer.appendChild(buildPopup(sportID, content, data));
-}
-
-function doAjaxRequest(url, successCallBack, sportID) {
-    xhr = new XMLHttpRequest();
-    xhr.addEventListener('readystatechange', function() {
-        if (this.status == 200 && this.readyState == 4) {
-            if (successCallBack) {
-                successCallBack(JSON.parse(this.responseText), sportID);
-            }
-        }
-    });
-    xhr.open('GET', url, true);
-    xhr.send();
-}
-
-function generateSportPopup(id) {
-    reset(sportPopupContainer);
-    doAjaxRequest(`./${id.toUpperCase()}_UOF_1.json`, successCallBack, id);
-}
-
-function buildPopupButton(btnNamesArr) {
-    var btnContainer = document.createElement('div');
+// Builder
+function buildPopupButton(btnArr) {
+    var thisBtnArr,
+        btnContainer = document.createElement('div');
     btnContainer.className = 'popup-btn-container';
-    //? if called from console with required args
-    if (btnNamesArr.length > 0) {
-        btnNames.forEach((btn) => {
-            var newBtn = document.createElement('button');
-            newBtn.className = 'popup-btn';
-            newBtn.textContent = btn;
-            btnContainer.appendChild(newBtn);
-        });
-    }
-    //? if called from button with args from local obj array
-    else {
-        sports.forEach((sport) => {
-            var newBtn = document.createElement('button');
-            newBtn.className = 'popup-btn';
-            newBtn.textContent = sport.name;
-            newBtn.addEventListener('click', function() {
-                generateSportPopup(sport.id);
-            });
-            btnContainer.appendChild(newBtn);
-        });
-    }
-    return btnContainer;
-}
 
-function buildSportButton(arr) {
-    var btnContainer = document.createElement('div');
-    btnContainer.className = 'popup-btn-container';
-    arr.matches.forEach((match) => {
+    // check wich popup to generate
+    if (btnArr.matches) {
+        thisBtnArr = btnArr.matches
+    } else if (btnArr.length > 0) {
+        thisBtnArr = btnArr;
+    } else thisBtnArr = sports;
+
+    thisBtnArr.forEach((btn) => {
         var newBtn = document.createElement('button');
         newBtn.className = 'popup-btn';
-        newBtn.textContent = match.fullTitle;
+        newBtn.textContent = btn.fullTitle;
+        // if matches
+        if (btn.id) {
+            newBtn.addEventListener('click', function() {
+                generateSportPopup(btn.id);
+            });
+        }
         btnContainer.appendChild(newBtn);
     });
+
     return btnContainer;
 }
 
 function buildPopup(title, content, arr) {
+    reset(popupContainer);
     var div = document.createElement('div'),
         topDiv = document.createElement('div'),
         popupTitle = document.createElement('h2'),
@@ -96,21 +65,16 @@ function buildPopup(title, content, arr) {
     popupTitle.textContent = title;
     popupCross.textContent = 'X';
     popupContent.textContent = content;
-    if (arr) {
-        if (arr.matches) {
-            btnContainer = buildSportButton(arr);
-            //? set closing
-            popupCross.addEventListener('click', () => {
-                reset(sportPopupContainer);
-            });
-        } else {
-            btnContainer = buildPopupButton(arr);
-            //? set closing
-            popupCross.addEventListener('click', () => {
-                reset(popupContainer);
-            });
-        }
-    }
+    //? create appropriate buttons
+    btnContainer = buildPopupButton(arr);
+    //? set closing
+    popupCross.addEventListener('click', () => {
+        if (content == 'next matches:') {
+            // if on matches popup, re-generate sport popup at closing
+            generatePopup();
+            // if on sport popup, cross just close it 
+        } else reset(popupContainer);
+    });
     //? nesting
     topDiv.appendChild(popupTitle);
     topDiv.appendChild(popupCross);
@@ -118,16 +82,37 @@ function buildPopup(title, content, arr) {
     botDiv.appendChild(btnContainer);
     div.appendChild(topDiv);
     div.appendChild(botDiv);
-
     return div;
 }
 
-function generatePopup(title = "my default title", content = 'my default content', ...btnNames) {
-    reset(popupContainer);
-    popupContainer.appendChild(buildPopup(title, content, btnNames));
+// xhr 
+function doAjaxRequest(url, sportID) {
+    xhr = new XMLHttpRequest();
+    xhr.addEventListener('readystatechange', function() {
+        if (this.status == 200 && this.readyState == 4) {
+            var json = JSON.parse(this.responseText);
+            console.log(json);
+            popupContainer.appendChild(buildPopup(sportID, 'next matches:', json));
+        }
+    });
+    xhr.open('GET', url, true);
+    xhr.send();
 }
 
-// ------------------------------------------------------ applications
+// Called on click, builder trigger
+//? click on sport btn
+function generateSportPopup(id) {
+    reset(popupContainer);
+    doAjaxRequest(`./${id.toUpperCase()}_UOF_1.json`, id);
+}
+
+//? click on show popup
+function generatePopup(title = "my default title", content = 'my default content', btnArr = []) {
+    reset(popupContainer);
+    popupContainer.appendChild(buildPopup(title, content, btnArr));
+}
+
+// * ------------------------------------------------------ applications
 generatePopupBtn.addEventListener('click', () => {
     generatePopup();
 });
